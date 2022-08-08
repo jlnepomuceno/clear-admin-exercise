@@ -61,7 +61,7 @@ export default function ClearTable(props) {
         <Col>
           <Button onClick={handleFilterClick}>Sort</Button>
         </Col>
-        <Col md={3}>
+        <Col>
           <p className="float-end">{internalData.length} products found</p>
         </Col>
       </Row>

@@ -35,15 +35,13 @@ export default function Home() {
 
   return (
     <div>
-      <Container>
+      <Container fluid>
         <Row style={{ marginTop: '20px' }}>
           <Col>
             <h1>Clear Admin Devices Catalog</h1> 
           </Col>
         </Row>
-        <Row>
-          {renderResults()}
-        </Row>
+        {renderResults()}
       </Container>
     </div>
   );
