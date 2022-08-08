@@ -3,18 +3,18 @@ import { Col, Button, Row, Offcanvas, Form } from "react-bootstrap";
 import ProductCard from "./ProductCard";
 
 const SORT_SELECTION = [
-  // { id: "name-asc", label: "Name: Asc", group: "sort-group"},
-  // { id: "name-desc", label: "Name: Desc", group: "sort-group"},
-  { id: "newest", label: "Newest", group: "sort-group"},
-  { id: "low-price", label: "Price: Low to High", group: "sort-group"},
-  { id: "high-price", label: "Price: High to Low", group: "sort-group"},
-  { id: "rating", label: "Top Rated", group: "sort-group"}
+  { value: "newest", label: "Newest"},
+  { value: "rating", label: "Top Rated"},
+  { value: "most-rating", label: "Most Rated"},
+  { value: "low-price", label: "Price: Low to High"},
+  { value: "high-price", label: "Price: High to Low"}
 ]
 
 export default function ClearTable(props) {
   const { catalogData } = props;
+  const [internalData, setInternalData] = React.useState(catalogData);
   const [openFilter, setOpenFilter] = React.useState(false);
-  const [valueReset, setValueReset] = React.useState(true);
+  const [radioValue, setRadioValue] = React.useState("newest");
 
   const handleFilterClick = () => {
     setOpenFilter(true);
@@ -24,35 +24,62 @@ export default function ClearTable(props) {
     setOpenFilter(false);
   };
 
+  const handleApplyFilter = () => {
+    setOpenFilter(false);
+    switch(radioValue) {
+      case "newest":
+        setInternalData(internalData.sort((a, b) => new Date(b.startDate) - new Date(a.startDate)));
+        break;
+      case "rating":
+        setInternalData(internalData.sort((a, b) => b.mStarRatings - a.mStarRatings));
+        break;
+      case "most-rating":
+        setInternalData(internalData.sort((a, b) => b.mNumOfStarReviews - a.mNumOfStarReviews));
+        break;
+      case "low-price":
+        setInternalData(internalData.sort((a, b) => a.msrp - b.msrp));
+        break;
+      case "high-price":
+        setInternalData(internalData.sort((a, b) => b.msrp - a.msrp));
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleClearFilter = () => {
+    setRadioValue("newest");
+  };
+
   React.useEffect(() => {
-    console.log("reset")
-  }, [valueReset])
+    handleApplyFilter();
+  }, []);
 
   return (
     <>
       <Row style={{ marginBottom: "10px", marginTop: "20px" }}>
         <Col>
-          <Button onClick={handleFilterClick}>Filters</Button>
+          <Button onClick={handleFilterClick}>Sort</Button>
         </Col>
-        <Col md={1}>
-          <p className="float-end">Count</p>
+        <Col md={3}>
+          <p className="float-end">{internalData.length} products found</p>
         </Col>
       </Row>
       <Row>
-        {catalogData.map((item) => {
+        {internalData.map((item) => {
           return (
-            <Col md={4} sm={6} xs={12} style={{ marginBottom: "20px" }}>
+            <Col md={4} sm={6} xs={12} style={{ marginBottom: "20px" }} id={item.mId}>
               <ProductCard
                 imageSrc={`https:${item.mImageUrl}`}
-                name={item.mName}
                 brand={item.mBrand}
                 model={item.mModel}
                 price={item.mListPrice}
                 rating={item.mStarRatings}
                 reviews={item.mNumOfStarReviews}
-                description={item.mDescription}
                 productLink={item.mProductPageURL}
+                isNewArrival={item.mIsNewArrival}
                 internalStorage={`${item.internalMemory}  ${item.internalMemoryUOM}`}
+                productURL={item.PDPPageURL}
               />
             </Col>
           );
@@ -61,47 +88,35 @@ export default function ClearTable(props) {
 
       <Offcanvas show={openFilter} onHide={handleClose} style={{ padding: "20px"}}>
         <Offcanvas.Header closeButton>
-          <Offcanvas.Title>Filters</Offcanvas.Title>
+          <Offcanvas.Title>Sort Products</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
-          {/* <Row style={{ paddingBottom: "5%"}}>
-            <Col>
-              <h6>Filter by</h6>
-              <Form.Check
-                type="radio"
-                id={"default-radio"}
-                label={"default radio"}
-              />
-            </Col>
-          </Row> */}
 
           <Row style={{ paddingBottom: "5%"}}>
             <Col>
               <h6>Sort by</h6>
               {
-                SORT_SELECTION.map(el => {
-                  return (
-                    <Form.Check
-                      type="radio"
-                      id={el.id}
-                      checked={valueReset}
-                      label={el.label}
-                      name={el.group}
-                      value={valueReset}
-                      onChange={(e)=> console.log("selected", e)}
-                    />
-                  )
-                }) 
+                SORT_SELECTION.map((radio, index) => (
+                  <Form.Check
+                    key={index}
+                    type="radio"
+                    name="radio"
+                    value={radio.value}
+                    checked={radioValue === radio.value}
+                    onChange={e => setRadioValue(e.currentTarget.value)}
+                    label={radio.label}
+                  />
+                )) 
               }
             </Col>
           </Row>
 
           <Row style={{ paddingBottom: "5%"}}>
             <Col>
-              <Button className="float-end">Apply Filter</Button>
+              <Button className="float-end" onClick={handleApplyFilter}>Apply Sort</Button>
             </Col>
             <Col>
-              <Button className="btn-warning float-start" onClick={()=>setValueReset(!valueReset)}>Reset</Button>
+              <Button className="btn-warning float-start" onClick={handleClearFilter}>Reset</Button>
             </Col>
           </Row>
         </Offcanvas.Body>

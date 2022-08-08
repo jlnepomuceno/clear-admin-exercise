@@ -23,7 +23,7 @@ export default function Home() {
     if (catalogData.length === 0)
       return (
         <Col xs={12} style={{ marginBottom: "20px" }}>
-          No cats available
+          Loading data
         </Col>
       );
     return <ClearTable catalogData={catalogData}/>;
