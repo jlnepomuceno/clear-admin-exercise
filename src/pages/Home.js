@@ -13,7 +13,6 @@ export default function Home() {
   // for the select input box 
   const getData = () => {
     requestData(data => {
-      console.log("data", data);
       setCatalogData(data);
     });
   };
